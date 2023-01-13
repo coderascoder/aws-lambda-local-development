@@ -1,9 +1,12 @@
 import { S3Client, GetObjectCommand, PutObjectCommand, CreateBucketCommand, S3 } from "@aws-sdk/client-s3";
+import fs from 'fs';
+import { Stream } from 'stream';
+import { Upload } from "@aws-sdk/lib-storage";
 
 export class S3Operation {
   private readonly s3Client: S3Client;
 
-  constructor(region: string, s3Endpoint: string) {
+  constructor(region: string, s3Endpoint: string | undefined) {
     this.s3Client = new S3Client({ region, endpoint: s3Endpoint,  forcePathStyle: true});
   }
 
@@ -48,6 +51,31 @@ export class S3Operation {
       await this.s3Client.send(command);
     } catch (error) {
       console.error('Error of putObjectToS3', error)
+    } finally {
+    }
+  }
+
+  async uploadFileToS3(bucket: string, key: string, filePath: string) {
+
+    try {
+      const fileStream =  fs.createReadStream(filePath);
+
+      // const passThrough = new Stream.PassThrough();
+      // fileStream.pipe(passThrough);
+      
+      const upload = new Upload({
+        client: this.s3Client,
+        params: {
+            Bucket: bucket,
+            Key: key,
+            Body: fileStream,
+            // ContentType: file.mimetype,
+        }
+      });
+
+      await upload.done();
+    } catch (error) {
+      console.error('Error of uploadFileToS3', error)
     } finally {
     }
   }

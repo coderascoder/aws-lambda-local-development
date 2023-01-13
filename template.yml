@@ -4,6 +4,10 @@ Resources:
   HelloNameFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.lambdaHandler
+      Handler: dist/index.lambdaHandler
       Runtime: nodejs18.x
-      CodeUri: ./dist
+      CodeUri: ./
+      Environment:
+        Variables:
+          AWS_ENDPOINT: "http://192.168.56.101:4566"
+          AWS_S3_BUCKET_NAME: "aaa"

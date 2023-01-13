@@ -1,5 +1,9 @@
 # aws-lambda-local-development
-Develop AWS Lambda locally with Docker and LocalStack
+Develop AWS Lambda locally with Docker and LocalStack. Don't need to write code in AWS Lambda console in browser, even don't need to have an AWS account.
+
+We can develop, test, debug our Lambda functions locally before deploy it to cloud, it can save us time and money.
+
+This project use AWS SAM CLI to run lambda function locally, SAM will launch a container as an AWS serverless environment emulator and launch our Lambda function in this environment.
 
 ## Don't need to install any runtime
 You don't need to install Node/NPM on your local drive, it's good if you need to change computer or OS
@@ -7,7 +11,7 @@ You don't need to install Node/NPM on your local drive, it's good if you need to
 ## Prerequisition
  - Docker
  - AWS SAM CLI (For running serverless application like Lambda locally)
- - LocalStack Image (For emulate AWS services (e.g. S3) locally in a container)
+ - LocalStack container (AWS services (e.g. S3) local emulator)
 
 ## All code is Typescript
 All code is written in TypeScript
