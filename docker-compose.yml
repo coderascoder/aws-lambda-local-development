@@ -1,0 +1,33 @@
+version: '3'
+services:
+  base:
+    image: node:18
+    volumes:
+      - .:/app
+    working_dir: /app
+
+  start:
+    extends:
+      service: base
+    command: npm run start
+    ports:
+      - 80:80
+
+  install:
+    extends:
+      service: base
+    command: npm i
+
+  build:
+    extends:
+      service: base
+    command: npm run build
+
+  create-bundles:
+    extends:
+      service: base
+    command: npm run create-bundles
+
+
+
+
