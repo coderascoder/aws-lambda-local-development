@@ -13,9 +13,7 @@ const s3ops = new S3Operation(region, s3Endpoint);
 
 //
 export const lambdaHandler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
-  await createLargeGitHubCommitJsonFile('/tmp/append.txt');
-
-  await s3ops.uploadFileToS3(bucketName, 'aaa', '/tmp/append.txt');
+  await generateTestJSON();
 
   return {
       statusCode: 200,
@@ -24,6 +22,13 @@ export const lambdaHandler = async (event: APIGatewayEvent, context: Context): P
       }),      
   };
 };
+
+async function generateTestJSON() {
+  await createLargeGitHubCommitJsonFile('/tmp/git.json');
+  await createLargeHrJsonFile('/tmp/hr.json');
+  await s3ops.uploadFileToS3(bucketName, 'raw/github-commits/github-commits.json', '/tmp/git.json');
+  await s3ops.uploadFileToS3(bucketName, 'hr/hr.json', '/tmp/hr.json');
+}
 
 async function createLargeGitHubCommitJsonFile(filePath: string) {
   const orgs = [
@@ -37,17 +42,15 @@ async function createLargeGitHubCommitJsonFile(filePath: string) {
   try {    
     const stream = fs.createWriteStream(filePath, {flags:'a'});
 
-    for (let i = 0; i < 10; i++) {
-      const lanId = uniqueNamesGenerator({
-        dictionaries: [names],
-      });
+    for (let i = 0; i < 100000; i++) {
+      const lanId = `lanid_${i}`;
   
       const name = uniqueNamesGenerator({
         dictionaries: [names, names],
         separator: ' ',
       });
   
-      const a = {
+      const item = {
         lan_id: lanId.toLowerCase(),
         name,
         email: '',
@@ -58,13 +61,73 @@ async function createLargeGitHubCommitJsonFile(filePath: string) {
         org: orgs[i % orgs.length],
       };
   
-      stream.write(JSON.stringify(a) + '\n');
+      stream.write(JSON.stringify(item) + '\n');
     }
 
     await new Promise(function(resolve, reject) {
       stream.end(() => resolve(''));
     });
-  
   } catch (error) {
+    console.log('====> Error of createLargeGitHubCommitJsonFile', error)
+  }
+}
+
+async function createLargeHrJsonFile(filePath: string) {
+  const orgs = [
+      'CIO4Tech',
+      'CDAO',
+      'DOT',
+      'RBS',
+      'PSU',
+  ];
+  
+  const gm = [
+      'Brendan H',
+      'Lisa Lee',
+      'Tom Hank',
+      'Jim Trump',
+      'Lucy Anstice',
+  ];
+  
+  const em = [
+      'Jim Monday',
+      'Tom tuesday',
+      'Paris Wednesday',
+      'Ameri thursday',
+      'Luise Friday',
+      'Plane Sat',
+      'Church Sunday',
+  ];
+  
+  try {
+      const stream = fs.createWriteStream(filePath, { flags: 'w' });
+      
+      for (let i = 0; i < 50000; i++) {
+          const lanId = `lanid_${i}`;
+
+          const name = uniqueNamesGenerator({
+              dictionaries: [names, names],
+              separator: ' ',
+          });
+          
+          const item = {
+              lan_id: lanId.toLowerCase(),
+              name,
+              email: '',
+              jobFamily: 'Software Engineering',
+              git_name: lanId,
+              org: orgs[i % orgs.length],
+              em: em[i % em.length],
+              gm: gm[i % gm.length]
+          };
+          stream.write(JSON.stringify(item) + '\n');
+      }
+      
+      await new Promise(function (resolve, reject) {
+          stream.end(() => resolve(''));
+      });
+  }
+  catch (error) {
+      console.log('====> Error of createLargeHrJsonFile', error)
   }
 }
